@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Firmar el libro · Cumple de Pancha</title>
+<link rel="stylesheet" href="firmar.css" />
+</head>
+<body>
+
+<main id="card">
+  <p class="eyebrow">[ libro de visitas ]</p>
+  <h1>Dejale algo<br /><em>a Pancha</em></h1>
+  <p class="sub">Una foto, un mensajito, lo que quieras.</p>
+
+  <form id="form">
+    <label class="field photo-field" for="photo">
+      <input type="file" id="photo" name="photo" accept="image/*" capture="environment" />
+      <span id="photo-preview-wrap">
+        <img id="photo-preview" alt="" hidden />
+        <span id="photo-placeholder">+ Agregar foto</span>
+      </span>
+    </label>
+
+    <label class="field">
+      <span class="field-label">Tu nombre</span>
+      <input type="text" id="name" name="name" maxlength="40" required placeholder="¿Quién sos?" />
+    </label>
+
+    <label class="field">
+      <span class="field-label">Tu mensaje</span>
+      <textarea id="comment" name="comment" maxlength="280" rows="4" placeholder="Feliz cumple..."></textarea>
+    </label>
+
+    <button type="submit" id="submit-btn">Enviar</button>
+    <p id="error" role="alert" hidden></p>
+  </form>
+
+  <div id="success" hidden>
+    <p class="eyebrow">[ gracias ]</p>
+    <h2>Quedó guardado <em>:)</em></h2>
+    <button type="button" id="again-btn">Agregar otro</button>
+  </div>
+</main>
+
+<script type="module" src="firmar.js"></script>
+</body>
+</html>
