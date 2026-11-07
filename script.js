@@ -1,4 +1,14 @@
-const photoEls = Array.from(document.querySelectorAll('.photo'));
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const depthLayer = document.getElementById('depth-layer');
 const intro = document.getElementById('intro');
 const outro = document.getElementById('outro');
 const progressDot = document.getElementById('progress-dot');
@@ -10,18 +20,21 @@ const STEP = 900; // spacing between photos, matches --z values in index.html
 const PASS = 350; // depth past camera before a photo is fully gone
 const FADE_IN_SPAN = 1700; // how far out a photo starts becoming visible
 
-const photos = photoEls.map((el, i) => ({
-  el,
-  img: el.querySelector('img'),
-  x: el.style.getPropertyValue('--x').trim(),
-  y: el.style.getPropertyValue('--y').trim(),
-  z: parseFloat(el.style.getPropertyValue('--z')),
-  rot: el.style.getPropertyValue('--rot').trim(),
-  phase: i * 1.37,
-}));
+function buildPhoto(el, i) {
+  return {
+    el,
+    x: el.style.getPropertyValue('--x').trim(),
+    y: el.style.getPropertyValue('--y').trim(),
+    z: parseFloat(el.style.getPropertyValue('--z')),
+    rot: el.style.getPropertyValue('--rot').trim(),
+    phase: i * 1.37,
+  };
+}
 
-const lastZ = Math.min(...photos.map((p) => p.z)); // most negative
-const maxDepth = Math.abs(lastZ) + STEP; // room for the last photo to pass + outro reveal
+const staticEls = Array.from(document.querySelectorAll('.photo'));
+let photos = staticEls.map(buildPhoto);
+let lastZ = Math.min(...photos.map((p) => p.z));
+let maxDepth = Math.abs(lastZ) + STEP;
 
 let targetDepth = 0;
 let depth = 0;
@@ -120,3 +133,86 @@ function frame(t) {
 }
 
 requestAnimationFrame(frame);
+
+// --- Live guestbook entries from Firestore ---
+
+const baseZ = lastZ; // z of the last static photo; guestbook entries continue from here
+const dynamicStart = staticEls.length;
+
+function layoutFor(i) {
+  const side = i % 2 === 0 ? -1 : 1;
+  const amp = 20 + (i % 3) * 4; // 20 / 24 / 28 vw
+  const x = `${(side * amp).toFixed(0)}vw`;
+  const y = `${(((i % 4) - 1.5) * 8).toFixed(0)}vh`;
+  const rot = `${(side * -1 * (2 + (i % 3))).toFixed(0)}deg`;
+  return { x, y, rot };
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function buildEntryEl(doc, i) {
+  const { x, y, rot } = layoutFor(i);
+  const el = document.createElement('div');
+  el.className = 'photo photo--guest';
+  el.style.setProperty('--x', x);
+  el.style.setProperty('--y', y);
+  el.style.setProperty('--rot', rot);
+
+  const name = escapeHtml(doc.name || '');
+  const comment = doc.comment ? escapeHtml(doc.comment) : '';
+
+  if (doc.photo) {
+    el.innerHTML = `
+      <img src="${doc.photo}" alt="Foto del libro de visitas, de ${name}" />
+      <div class="photo-caption">
+        <span class="photo-caption__name">${name}</span>
+        ${comment ? `<span class="photo-caption__comment">${comment}</span>` : ''}
+      </div>
+    `;
+  } else {
+    el.classList.add('photo--text');
+    el.innerHTML = `
+      <div class="photo-text__comment">${comment}</div>
+      <div class="photo-text__name">${name}</div>
+    `;
+  }
+
+  return el;
+}
+
+function renderGuestbook(docs) {
+  for (const el of depthLayer.querySelectorAll('.photo--guest')) el.remove();
+
+  const dynamicPhotos = docs.map((doc, i) => {
+    const el = buildEntryEl(doc, i);
+    depthLayer.appendChild(el);
+    return {
+      el,
+      x: el.style.getPropertyValue('--x').trim(),
+      y: el.style.getPropertyValue('--y').trim(),
+      z: baseZ - (i + 1) * STEP,
+      rot: el.style.getPropertyValue('--rot').trim(),
+      phase: (dynamicStart + i) * 1.37,
+    };
+  });
+
+  photos = [...staticEls.map(buildPhoto), ...dynamicPhotos];
+  lastZ = Math.min(...photos.map((p) => p.z));
+  maxDepth = Math.abs(lastZ) + STEP;
+}
+
+try {
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const q = query(collection(db, 'guestbook'), orderBy('createdAt', 'asc'));
+  onSnapshot(q, (snapshot) => {
+    const docs = snapshot.docs.map((d) => d.data());
+    renderGuestbook(docs);
+  });
+} catch (err) {
+  console.error('Guestbook live feed unavailable:', err);
+}
