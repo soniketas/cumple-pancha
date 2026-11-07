@@ -9,38 +9,43 @@
 <body>
 
 <main id="card">
-  <a id="back" href="/">← volver</a>
-  <p class="eyebrow">[ libro de visitas ]</p>
-  <h1>Dejale algo<br /><em>a Pancha</em></h1>
-  <p class="sub">Una foto, un mensajito, lo que quieras.</p>
+  <div id="lang-toggle" role="group" aria-label="Language">
+    <button type="button" class="lang-btn" data-lang="es">ES</button>
+    <button type="button" class="lang-btn" data-lang="en">EN</button>
+  </div>
+
+  <a id="back" href="/" data-i18n="back">← volver</a>
+  <p class="eyebrow" data-i18n="eyebrowIntro">[ libro de visitas ]</p>
+  <h1><span data-i18n="h1Line1">Dejale algo</span><br /><em data-i18n="h1Line2">a Pancha</em></h1>
+  <p class="sub" data-i18n="sub">Una foto, un mensajito, lo que quieras.</p>
 
   <form id="form">
     <label class="field photo-field" for="photo">
-      <input type="file" id="photo" name="photo" accept="image/*" capture="environment" />
+      <input type="file" id="photo" name="photo" accept="image/*" />
       <span id="photo-preview-wrap">
         <img id="photo-preview" alt="" hidden />
-        <span id="photo-placeholder">+ Agregar foto</span>
+        <span id="photo-placeholder" data-i18n="addPhoto">+ Agregar foto</span>
       </span>
     </label>
 
     <label class="field">
-      <span class="field-label">Tu nombre</span>
-      <input type="text" id="name" name="name" maxlength="40" required placeholder="¿Quién sos?" />
+      <span class="field-label" data-i18n="nameLabel">Tu nombre</span>
+      <input type="text" id="name" name="name" maxlength="40" required data-i18n-placeholder="namePlaceholder" placeholder="¿Quién sos?" />
     </label>
 
     <label class="field">
-      <span class="field-label">Tu mensaje</span>
-      <textarea id="comment" name="comment" maxlength="280" rows="4" placeholder="Feliz cumple..."></textarea>
+      <span class="field-label" data-i18n="commentLabel">Tu mensaje</span>
+      <textarea id="comment" name="comment" maxlength="280" rows="4" data-i18n-placeholder="commentPlaceholder" placeholder="Feliz cumple..."></textarea>
     </label>
 
-    <button type="submit" id="submit-btn">Enviar</button>
+    <button type="submit" id="submit-btn" data-i18n="send">Enviar</button>
     <p id="error" role="alert" hidden></p>
   </form>
 
   <div id="success" hidden>
-    <p class="eyebrow">[ gracias ]</p>
-    <h2>Quedó guardado <em>:)</em></h2>
-    <button type="button" id="again-btn">Agregar otro</button>
+    <p class="eyebrow" data-i18n="thanksEyebrow">[ gracias ]</p>
+    <h2><span data-i18n="savedHeading">Quedó guardado</span> <em>:)</em></h2>
+    <button type="button" id="again-btn" data-i18n="addAnother">Agregar otro</button>
   </div>
 </main>
 

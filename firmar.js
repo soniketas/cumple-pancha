@@ -19,6 +19,80 @@ const errorEl = document.getElementById("error");
 const successEl = document.getElementById("success");
 const againBtn = document.getElementById("again-btn");
 
+const translations = {
+  es: {
+    back: "← volver",
+    eyebrowIntro: "[ libro de visitas ]",
+    h1Line1: "Dejale algo",
+    h1Line2: "a Pancha",
+    sub: "Una foto, un mensajito, lo que quieras.",
+    addPhoto: "+ Agregar foto",
+    nameLabel: "Tu nombre",
+    namePlaceholder: "¿Quién sos?",
+    commentLabel: "Tu mensaje",
+    commentPlaceholder: "Feliz cumple...",
+    send: "Enviar",
+    sending: "Enviando...",
+    thanksEyebrow: "[ gracias ]",
+    savedHeading: "Quedó guardado",
+    addAnother: "Agregar otro",
+    errName: "Poné tu nombre.",
+    errBoth: "Agregá una foto o un mensaje.",
+    errGeneric: "Algo salió mal, probá de nuevo.",
+  },
+  en: {
+    back: "← back",
+    eyebrowIntro: "[ guestbook ]",
+    h1Line1: "Leave something",
+    h1Line2: "for Pancha",
+    sub: "A photo, a little note, whatever you like.",
+    addPhoto: "+ Add photo",
+    nameLabel: "Your name",
+    namePlaceholder: "Who are you?",
+    commentLabel: "Your message",
+    commentPlaceholder: "Happy birthday...",
+    send: "Send",
+    sending: "Sending...",
+    thanksEyebrow: "[ thanks ]",
+    savedHeading: "Saved",
+    addAnother: "Add another",
+    errName: "Enter your name.",
+    errBoth: "Add a photo or a message.",
+    errGeneric: "Something went wrong, try again.",
+  },
+};
+
+const LANG_KEY = "cumple-pancha-lang";
+let currentLang = localStorage.getItem(LANG_KEY) || "es";
+
+function t(key) {
+  return translations[currentLang][key] || translations.es[key];
+}
+
+function applyLang() {
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll(".lang-btn").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.lang === currentLang);
+  });
+  submitBtn.textContent = submitBtn.disabled ? t("sending") : t("send");
+}
+
+document.querySelectorAll(".lang-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    currentLang = btn.dataset.lang;
+    localStorage.setItem(LANG_KEY, currentLang);
+    applyLang();
+  });
+});
+
+applyLang();
+
 let selectedFile = null;
 
 photoInput.addEventListener("change", () => {
@@ -76,14 +150,14 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   errorEl.hidden = true;
   submitBtn.disabled = true;
-  submitBtn.textContent = "Enviando...";
+  submitBtn.textContent = t("sending");
 
   try {
     const name = document.getElementById("name").value.trim();
     const comment = document.getElementById("comment").value.trim();
 
-    if (!name) throw new Error("Poné tu nombre.");
-    if (!comment && !selectedFile) throw new Error("Agregá una foto o un mensaje.");
+    if (!name) throw new Error("errName");
+    if (!comment && !selectedFile) throw new Error("errBoth");
 
     const photo = selectedFile ? await photoToDataUrl(selectedFile) : null;
 
@@ -97,11 +171,11 @@ form.addEventListener("submit", async (e) => {
     form.hidden = true;
     successEl.hidden = false;
   } catch (err) {
-    errorEl.textContent = err.message || "Algo salió mal, probá de nuevo.";
+    errorEl.textContent = translations.es[err.message] ? t(err.message) : t("errGeneric");
     errorEl.hidden = false;
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = "Enviar";
+    submitBtn.textContent = t("send");
   }
 });
 
