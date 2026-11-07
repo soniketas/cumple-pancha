@@ -33,6 +33,18 @@ body {
   max-width: 420px;
 }
 
+#back {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+#back:hover {
+  color: var(--ink);
+}
+
 .eyebrow {
   margin: 0 0 10px;
   font-size: 12px;
