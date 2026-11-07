@@ -1,0 +1,14 @@
+{
+  "name": "cumple-pancha",
+  "version": "1.0.0",
+  "description": "Pagina de cumpleanos para Pancha",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve -l 5800 .",
+    "convert": "node convert.mjs"
+  },
+  "type": "module",
+  "devDependencies": {
+    "sharp": "^0.35.5"
+  }
+}
